@@ -1,23 +1,42 @@
-import { DatabaseSQLiteSingleton}  from "./src/app/database-sqlite-singleton";
-import { DBConnectionFacade } from "./src/base/db-connection";
+import {RunResult} from "sqlite3";
+import {DBProvider} from "./src/base/db-provider";
+import {SQLiteDbProvider} from "./src/db/sqlite/db.sqlite";
+import {BaseModelDAO} from "./src/base/base-model-dao";
+import {IngredientModel} from "./src/db/ingredient/ingredient-model";
+import {IngredientRepository} from "./src/db/ingredient/ingredient-repository";
 
-const db: DBConnectionFacade = new DBConnectionFacade(DatabaseSQLiteSingleton.getInstance('./drinkjs.db').sqliteConnection);
+const dbProvider: DBProvider<string, RunResult> = new SQLiteDbProvider('./drinkjs.db');
+const modelDAO: BaseModelDAO<IngredientModel, RunResult> = new BaseModelDAO<IngredientModel, RunResult>(dbProvider, 'ingredient');
+const ingredientRepository: IngredientRepository<RunResult> = new IngredientRepository(modelDAO);
 
-db.open();
-db.exec(`
-  CREATE TABLE IF NOT EXISTS ingredient (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    createdAt TEXT,
-    alcohol BOOLEAN NOT NULL
-  );
-`).then(() => {
-  db.exec(`
-  INSERT INTO ingredient (id, name, createdAt, alcohol) VALUES (1, 'Gin', null, true), (2, 'Tea', null, false);
-`).then((res) => console.log(res));
-}).then(() => {
-  db.close();
-})
+const newItem: IngredientModel = {
+  name: 'test',
+  id: 1,
+  alcohol: true,
+  createdAt: '2024-01-30',
+}
 
+ingredientRepository.createItem(newItem).then(result => {
+  console.log('ok: ', result);
+}).catch(error => {
+  console.error('error: ', error);
+});
 
+ingredientRepository.findExactlyOne(1).then(result => {
+  console.log('ok: ', result);
+}).catch(error => {
+  console.error('error: ', error);
+});
+
+ingredientRepository.update(1, {...newItem, alcohol: false}).then(result => {
+  console.log('ok: ', result);
+}).catch(error => {
+  console.error('error: ', error);
+});
+
+// ingredientRepository.deleteItem(1).then(result => {
+//   console.log('ok: ', result);
+// }).catch(error => {
+//   console.error('error: ', error);
+// });
 

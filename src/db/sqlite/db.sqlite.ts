@@ -1,37 +1,34 @@
-import { DBProvider } from "../../base/db-connection-factory-method";
-import { Database } from "sqlite";
-import * as sqlite3 from "sqlite3";
-import {ISqlite} from "sqlite/build/interfaces";
+import {Database, RunResult} from 'sqlite3';
+import {DBProvider} from "../../base/db-provider";
+import {ConsoleLogLogger} from "../../logger/console-log-logger";
 
+export class SQLiteDbProvider implements DBProvider<string, RunResult> {
+  private db: Database;
+  private logger: ConsoleLogLogger = new ConsoleLogLogger();
 
-export class DbSqlite implements DBProvider<{ filename: string }> {
-  private sqlite: Database;
-  constructor(config: {filename: string}) {
-    this.createConnection(config);
-  }
-
-  public closeConnection(): void {
-    if(this.sqlite?.db) {
-      this.sqlite.db.close();
-    }
-  }
-
-  public openDatabase(): void {
-    this.sqlite.open();
-  }
-
-  public createConnection(config: {filename: string}): void {
-    this.sqlite = new Database({
-      filename: config.filename,
-      driver: sqlite3.Database,
+  constructor(dbFilePath: string) {
+    this.db = new Database(dbFilePath, (err) => {
+      if (err) {
+        this.logger.error('[SQLite] Error opening SQLite database: ' + err);
+      } else {
+        this.logger.log('[SQLite] Connected to SQLite database');
+      }
     });
   }
 
-  public execQuery(query: string): Promise<ISqlite.RunResult<sqlite3.Statement>> {
-    if(!this.sqlite?.db) {
-      throw new Error('[DB SQLite] connection lost!');
-    }
-    return this.sqlite.run(query);
-  }
+  public async execQuery(query: string): Promise<RunResult> {
+    const self = this;
 
+    return new Promise((resolve, reject) => {
+      self.db.run(query, function (err) {
+        if (err) {
+          self.logger.error('Error executing SQLite query: ' + err.message);
+          reject(err);
+        } else {
+          self.logger.log('SQLite query executed successfully');
+          resolve(this);
+        }
+      });
+    });
+  }
 }
