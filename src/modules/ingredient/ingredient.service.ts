@@ -7,31 +7,31 @@ import { DestroyOptions, FindOptions, UpdateOptions} from "sequelize/types/model
 
 @Injectable()
 export class IngredientService {
-
   constructor(
     @InjectModel(Ingredient)
-    public ingredientRepository: typeof Ingredient,
+    private ingredientRepository: typeof Ingredient
   ) {}
 
-  public create(createIngredientDto: CreateIngredientDto): void {
+  public create(createIngredientDto: CreateIngredientDto): Promise<Ingredient> {
     const mappedEntity: Partial<Ingredient> = {
       alcohol: createIngredientDto.isAlcoholic,
       name: createIngredientDto.name,
       createdAt: createIngredientDto.createdAt,
     }
 
-    this.ingredientRepository.create(mappedEntity)
+    return this.ingredientRepository.create(mappedEntity)
   }
 
   public findAll() {
     return this.ingredientRepository.findAll();
   }
 
-  findOne(id: number) {
+  public findOne(id: number) {
     const payload: FindOptions<Ingredient> = {
       where: {id}
     }
-    return this.ingredientRepository.findOne(payload);
+
+    return this.ingredientRepository.findOne(payload)
   }
 
   update(id: number, { name, createdAt, isAlcoholic }: UpdateIngredientDto) {
