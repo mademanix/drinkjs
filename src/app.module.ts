@@ -4,6 +4,7 @@ import {SequelizeModule} from "@nestjs/sequelize";
 import {dbConfig} from "./database/database.config";
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import {TheCocktailDbIngredientModule} from "./modules/the-cocktail-db/ingredient/the-cocktail-db-ingredient.module";
 import {TheCocktailDbModule} from "./modules/the-cocktail-db/the-cocktail-db.module";
 
 @Module({

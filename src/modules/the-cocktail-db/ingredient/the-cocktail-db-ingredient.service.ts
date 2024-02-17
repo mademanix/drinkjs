@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {HttpService} from "@nestjs/axios";
 import {COCKTAIL_API_RESOURCES} from "./resources/cocktail-api.resources";
-import {firstValueFrom, map, Observable, tap} from "rxjs";
+import {firstValueFrom, map, Observable, of, tap} from "rxjs";
 import {TheCocktailDbEntity} from "./entities/the-cocktail-db.entity";
 import {
   AllIngredientsNameJunkResponse,
@@ -13,7 +13,7 @@ import {IngredientEntity} from "./interfaces/ingredient.entity";
 
 const MAX_INGREDIENT_ID: number = 616;
 @Injectable()
-export class TheCocktailDbService {
+export class TheCocktailDbIngredientService {
 
   constructor(private readonly httpService: HttpService) {}
   public getAllIngredientsName(): Observable<IngredientsCollection> {
@@ -50,12 +50,11 @@ export class TheCocktailDbService {
       )
   }
 
-  public getIngredientThumbnail(name: string): Observable<Blob> {
+  public getIngredientThumbnail(name: string): Observable<string> {
     if(!name?.length || typeof name !== 'string') {
       return null;
     }
 
-    return this.httpService.get<Blob>(COCKTAIL_API_RESOURCES.INGREDIENTS.getIngredientThumbnail(name))
-      .pipe(map(({data}) => data))
+    return of('www.thecocktaildb.com/images/ingredients/' + name + '.png')
   }
 }

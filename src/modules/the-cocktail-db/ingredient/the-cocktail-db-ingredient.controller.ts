@@ -1,12 +1,12 @@
 import {Controller, Get, Header, Param} from '@nestjs/common';
-import { TheCocktailDbService } from './the-cocktail-db.service';
+import { TheCocktailDbIngredientService } from './the-cocktail-db-ingredient.service';
 import {IngredientsCollection} from "./interfaces/cocktail-api-junk-interfaces";
 import {IngredientEntity} from "./interfaces/ingredient.entity";
 import {Observable} from "rxjs";
 
 @Controller('the-cocktail-db/ingredient')
-export class TheCocktailDbController {
-  constructor(private readonly theCocktailDbService: TheCocktailDbService) {}
+export class TheCocktailDbIngredientController {
+  constructor(private readonly theCocktailDbService: TheCocktailDbIngredientService) {}
   @Get('all')
   public findAll(): Observable<IngredientsCollection> {
     return this.theCocktailDbService.getAllIngredientsName();
@@ -24,9 +24,7 @@ export class TheCocktailDbController {
 
   /// TODO WIP
   @Get('thumbnail/:name')
-  @Header('Content-Type', 'image/png')
-  public getIngredientThumbnail(@Param('name') name: string): Observable<Blob> {
-    return this.theCocktailDbService.getIngredientThumbnail(name).pipe(
-    );
+  public getIngredientThumbnail(@Param('name') name: string): Observable<string> {
+    return this.theCocktailDbService.getIngredientThumbnail(name);
   }
 }
